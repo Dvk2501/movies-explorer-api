@@ -7,7 +7,8 @@ const NotFoundError = require('../errors/NotFoundError');
 const NotAllowedError = require('../errors/NotAllowedError');
 
 module.exports.getMovies = (req, res, next) => {
-  Movie.find({})
+  Movie.find({ owner: req.user._id })
+    .populate('owner')
     .then((movie) => res.send(movie))
     .catch(next);
 };
@@ -54,15 +55,14 @@ module.exports.addMovie = (req, res, next) => {
 module.exports.deleteMovie = (req, res, next) => {
   const { movieId } = req.params;
   const userId = req.user._id;
-  Movie.findByIdAndRemove(movieId)
+  Movie.findById(movieId)
     .orFail(new NotFoundError('Фильм с таким _id не найден'))
     .then((movie) => {
-      if (!movie.owner.equals(userId)) {
-        next(new NotAllowedError('У данного пользователя нет прав для удаления этого фильма.'));
-      } else {
+      if (movie.owner.equals(userId)) {
         movie.remove();
         res.status(OK).send({ message: 'Фильм успешно удален' });
       }
+      return next(new NotAllowedError('У данного пользователя нет прав для удаления этого фильма.'));
     })
     .catch(next);
 };
