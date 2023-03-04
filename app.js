@@ -9,8 +9,9 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 const router = require('./routes');
 
 const { PORT = 3000 } = process.env;
+const { MONGODIP = 'mongodb://localhost:27017/bitfilmsdb' } = process.env;
 const app = express();
-mongoose.connect('mongodb://localhost:27017/bitfilmsdb ');
+mongoose.connect(MONGODIP);
 
 app.use(express.json());
 app.use(cors);
