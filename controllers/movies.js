@@ -59,8 +59,7 @@ module.exports.deleteMovie = (req, res, next) => {
     .orFail(new NotFoundError('Фильм с таким _id не найден'))
     .then((movie) => {
       if (movie.owner.equals(userId)) {
-        movie.remove();
-        res.status(OK).send({ message: 'Фильм успешно удален' });
+        return movie.remove().then(() => res.status(OK).send({ message: 'Фильм успешно удален' }));
       }
       return next(new NotAllowedError('У данного пользователя нет прав для удаления этого фильма.'));
     })
